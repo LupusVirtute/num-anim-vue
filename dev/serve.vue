@@ -15,14 +15,13 @@ export default Vue.extend({
   mounted() {
     setInterval(() => {
       this.counter += Math.random();
-      console.log(this.counter)
-    }, 8000);
+    }, 500);
   }
 });
 </script>
 
 <template>
   <div id="app">
-    <num-anim-vue :precision="18" :countTo="counter"/>
+    <num-anim-vue :precision="2" :countTo="counter"/>
   </div>
 </template>

@@ -27,6 +27,7 @@ export default Vue.extend({
     intervalCounter: 0,
     updateBy: 0,
     updateDelta: 0,
+    lastUpdate: 0,
   }),
   mounted() {
     this.counter = this.startFrom
@@ -34,6 +35,11 @@ export default Vue.extend({
   },
   watch: {
     countTo(val: number) {
+      const updateTime = Date.now()
+      this.updateDelta = updateTime - this.lastUpdate
+      this.lastUpdate = updateTime
+
+
       if(!this.$refs.box) {
         this.counter = parseFloat(val.toFixed(this.precision))
         return;
@@ -45,10 +51,12 @@ export default Vue.extend({
         this.counter = parseFloat(val.toFixed(this.precision))
         return;
       }
-      this.updateBy = val - this.counter;
 
-      this.timeDelta = Math.ceil(this.time / this.precision)
+      this.updateBy = val - this.counter;
+      this.timeDelta = Math.ceil(this.time / this.precision / this.updateBy)
+      console.log(this.timeDelta)
       this.intervalCounter = 0
+
     }
   },
   methods: {
