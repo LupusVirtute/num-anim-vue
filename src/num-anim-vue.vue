@@ -26,13 +26,15 @@ export default Vue.extend({
     timeDelta: 0,
     intervalCounter: 0,
     updateBy: 0,
-    updateDelta: 0,
-    lastUpdate: 0,
+    interval: -1,
   }),
   mounted() {
     this.counter = this.startFrom
     this.updateCountTo(this.$props.countTo)
     this.doAnimation()
+  },
+  destroyed() {
+    clearInterval(this.interval)
   },
   watch: {
     countTo(val: number) {
@@ -41,9 +43,6 @@ export default Vue.extend({
   },
   methods: {
     updateCountTo(val: number) {
-      const updateTime = Date.now()
-      this.updateDelta = updateTime - this.lastUpdate
-      this.lastUpdate = updateTime
 
 
       if(!this.$refs.box) {
@@ -59,7 +58,7 @@ export default Vue.extend({
       }
 
       this.updateBy = val - this.counter;
-      this.timeDelta = Math.ceil(this.time / this.precision / this.updateBy)
+      this.timeDelta = Math.ceil(this.time / this.precision)
       this.intervalCounter = 0
     },
     easeInSine(x: number): number {
@@ -78,8 +77,8 @@ export default Vue.extend({
       return 1 / (10*precision)
     },
     doAnimation() {
-      setInterval(() => {
-        if(this.intervalCounter >= this.timeDelta) {
+      this.interval = setInterval(() => {
+        if(this.intervalCounter > this.timeDelta || !this.updateBy) {
           return;
         }
         const changeCo = this.updateBy * this.easeInSine(this.intervalCounter / this.timeDelta)
@@ -87,7 +86,7 @@ export default Vue.extend({
         this.counter += changeCo
 
         this.intervalCounter++
-      }, this.precision)
+      }, this.precision) as unknown as number
     }
   }
 });
