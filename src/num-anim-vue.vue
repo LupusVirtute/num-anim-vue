@@ -31,10 +31,16 @@ export default Vue.extend({
   }),
   mounted() {
     this.counter = this.startFrom
+    this.updateCountTo(this.$props.countTo)
     this.doAnimation()
   },
   watch: {
     countTo(val: number) {
+      this.updateCountTo(val)
+    }
+  },
+  methods: {
+    updateCountTo(val: number) {
       const updateTime = Date.now()
       this.updateDelta = updateTime - this.lastUpdate
       this.lastUpdate = updateTime
@@ -54,12 +60,8 @@ export default Vue.extend({
 
       this.updateBy = val - this.counter;
       this.timeDelta = Math.ceil(this.time / this.precision / this.updateBy)
-      console.log(this.timeDelta)
       this.intervalCounter = 0
-
-    }
-  },
-  methods: {
+    },
     easeInSine(x: number): number {
       return 1 - Math.cos((x * Math.PI) / 2);
     },
