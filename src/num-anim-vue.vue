@@ -27,14 +27,19 @@ export default Vue.extend({
     intervalCounter: 0,
     updateBy: 0,
     interval: -1,
+    isInViewPort: true,
   }),
   mounted() {
     this.counter = this.startFrom
     this.updateCountTo(this.$props.countTo)
     this.doAnimation()
+
+    window.addEventListener('scroll', this.onScroll)
   },
   destroyed() {
-    clearInterval(this.interval)
+    if(!this.interval)
+      clearInterval(this.interval)
+    window.removeEventListener('scroll', this.onScroll)
   },
   watch: {
     countTo(val: number) {
@@ -42,19 +47,27 @@ export default Vue.extend({
     }
   },
   methods: {
+    onScroll() {
+      const box = this.$refs.box as HTMLElement
+      this.isInViewPort = this.isInTheViewPort(box)
+    },
     updateCountTo(val: number) {
-
 
       if(!this.$refs.box) {
         this.counter = parseFloat(val.toFixed(this.precision))
         return;
       }
       
-      const box = this.$refs.box as HTMLElement
       
-      if (!this.isInTheViewPort(box)){
-        this.counter = parseFloat(val.toFixed(this.precision))
+      if (!this.isInViewPort){
+        this.counter = parseFloat(this.countTo.toFixed(this.precision))
+        clearInterval(this.interval)
+        this.interval = 0;
         return;
+      }
+
+      if(!this.interval) {
+        this.doAnimation()
       }
 
       this.updateBy = val - this.counter;
@@ -78,7 +91,9 @@ export default Vue.extend({
     },
     doAnimation() {
       this.interval = setInterval(() => {
-        if(this.intervalCounter > this.timeDelta || !this.updateBy) {
+        if(this.intervalCounter > this.timeDelta || !this.updateBy || !this.isInViewPort) {
+          this.interval = 0;
+          clearInterval(this.interval)
           return;
         }
         const changeCo = this.updateBy * this.easeInSine(this.intervalCounter / this.timeDelta)
