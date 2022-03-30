@@ -1,6 +1,6 @@
 {
   "name": "num-anim-vue",
-  "version": "1.0.16",
+  "version": "1.0.19",
   "description": "",
   "main": "dist/num-anim-vue.ssr.js",
   "browser": "dist/num-anim-vue.esm.js",

@@ -15,7 +15,7 @@ export default Vue.extend({
   mounted() {
     setInterval(() => {
       this.counter += Math.random() * 1;
-    }, 100);
+    }, 1000);
   }
 });
 </script>

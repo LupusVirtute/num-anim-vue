@@ -27,6 +27,9 @@ export default Vue.extend({
     intervalCounter: 0,
     updateBy: 0,
     interval: -1,
+    updatedTimeDelta: 0,
+    updatedUpdatedBy: 0,
+    isCounterUpdated: false,
     isInViewPort: true,
   }),
   mounted() {
@@ -37,21 +40,24 @@ export default Vue.extend({
     window.addEventListener('scroll', this.onScroll)
   },
   destroyed() {
-    if(!this.interval)
+    if(this.interval)
       clearInterval(this.interval)
     window.removeEventListener('scroll', this.onScroll)
   },
   watch: {
     countTo(val: number) {
-      this.updateCountTo(val)
+      const change = val - this.counter;
+      if(change >= Math.pow(10, -this.precision)) {
+        this.updateCountTo(val)
+      }
     }
   },
   methods: {
-    onScroll() {
+    async onScroll() {
       const box = this.$refs.box as HTMLElement
       this.isInViewPort = this.isInTheViewPort(box)
     },
-    updateCountTo(val: number) {
+    async updateCountTo(val: number) {
 
       if(!this.$refs.box) {
         this.counter = parseFloat(val.toFixed(this.precision))
@@ -60,22 +66,27 @@ export default Vue.extend({
       
       
       if (!this.isInViewPort){
-        this.counter = parseFloat(this.countTo.toFixed(this.precision))
         clearInterval(this.interval)
+        this.counter = parseFloat(val.toFixed(this.precision))
+        this.timeDelta = 0;
+        this.updateBy = 0;
+        this.intervalCounter = 1;
         this.interval = 0;
         return;
       }
 
-      if(!this.interval) {
+      this.isCounterUpdated = true;
+      this.updatedUpdatedBy = val - this.counter;
+      this.updatedTimeDelta = Math.ceil(this.time / this.precision)
+
+      if(!this.interval && this.isInViewPort) {
+        this.intervalCounter = 0;
         this.doAnimation()
       }
-
-      this.updateBy = val - this.counter;
-      this.timeDelta = Math.ceil(this.time / this.precision)
-      this.intervalCounter = 0
     },
-    easeOutQuint(x: number): number {
-      return 1 - Math.pow(1 - x, 5);
+    easeInSine(x: number): number {
+      return 1 - Math.cos((x * Math.PI) / 2);
+
     },
     isInTheViewPort(element: HTMLElement): boolean {
       const bounding = element.getBoundingClientRect();
@@ -89,14 +100,21 @@ export default Vue.extend({
     getLowestNumberForGivenPrecision(precision: number): number {
       return 1 / (10*precision)
     },
-    doAnimation() {
-      this.interval = setInterval(() => {
+    async doAnimation() {
+      this.interval = setInterval(async () => {
+
+        if(this.isCounterUpdated) {
+          this.updateBy = this.updatedUpdatedBy
+          this.timeDelta = this.updatedTimeDelta
+          this.isCounterUpdated = false
+        }
+
         if(this.intervalCounter > this.timeDelta || !this.updateBy || !this.isInViewPort) {
           this.interval = 0;
           clearInterval(this.interval)
           return;
         }
-        const changeCo = this.updateBy * this.easeOutQuint(this.intervalCounter / this.timeDelta)
+        const changeCo = this.updateBy * this.easeInSine(this.intervalCounter / this.timeDelta)
         this.updateBy -= changeCo
         this.counter += changeCo
 
