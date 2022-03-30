@@ -14,8 +14,8 @@ export default Vue.extend({
   },
   mounted() {
     setInterval(() => {
-      this.counter += Math.random();
-    }, 500);
+      this.counter += Math.random() * 1;
+    }, 100);
   }
 });
 </script>
@@ -23,5 +23,8 @@ export default Vue.extend({
 <template>
   <div id="app">
     <num-anim-vue :precision="2" :countTo="counter"/>
+  <span>
+    {{this.counter}}
+    </span>
   </div>
 </template>

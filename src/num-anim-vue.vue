@@ -74,8 +74,8 @@ export default Vue.extend({
       this.timeDelta = Math.ceil(this.time / this.precision)
       this.intervalCounter = 0
     },
-    easeInSine(x: number): number {
-      return 1 - Math.cos((x * Math.PI) / 2);
+    easeOutQuint(x: number): number {
+      return 1 - Math.pow(1 - x, 5);
     },
     isInTheViewPort(element: HTMLElement): boolean {
       const bounding = element.getBoundingClientRect();
@@ -96,12 +96,12 @@ export default Vue.extend({
           clearInterval(this.interval)
           return;
         }
-        const changeCo = this.updateBy * this.easeInSine(this.intervalCounter / this.timeDelta)
+        const changeCo = this.updateBy * this.easeOutQuint(this.intervalCounter / this.timeDelta)
         this.updateBy -= changeCo
         this.counter += changeCo
 
         this.intervalCounter++
-      }, this.precision) as unknown as number
+      }, 10 / this.precision) as unknown as number
     }
   }
 });
